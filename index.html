@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>我的训练计划</title>
+<style>
+  :root{
+    --p-waist:#ff6b9d; --p-upper:#4d96ff; --p-lower:#2ecc71;
+    --p-full:#ff9f43; --p-posture:#a66bff;
+    --bg:#0f1220; --card:#1a1f35; --card2:#222843; --text:#eef1ff; --muted:#9aa3c7;
+    --ok:#37d39b; --line:#2c3358;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 600px at 70% -10%,#232a4d 0%,var(--bg) 55%); color:var(--text);
+    line-height:1.55; padding:0 0 60px;
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:18px 16px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  h1{font-size:22px;margin:0;letter-spacing:.5px}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 14px}
+  .progress{font-size:13px;color:var(--muted);background:var(--card);border:1px solid var(--line);
+    padding:6px 12px;border-radius:999px;white-space:nowrap}
+  .progress b{color:var(--ok)}
+  .bar{height:8px;border-radius:999px;background:var(--card2);overflow:hidden;margin:10px 0 18px;border:1px solid var(--line)}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),#7ef0c4);width:0;transition:width .4s}
+
+  .settings{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:18px;font-size:13px}
+  .settings label{color:var(--muted)}
+  .settings input[type=date]{background:var(--card2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:6px 8px;font-size:13px}
+  .btn{background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:9px;
+    padding:7px 12px;font-size:13px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:#46508a;background:#2a3157}
+  .btn.primary{background:#3b6dff;border-color:#3b6dff}
+  .btn.primary:hover{background:#5a85ff}
+
+  section{margin-bottom:22px}
+  .sec-title{font-size:15px;font-weight:700;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+  .sec-title .dot{width:8px;height:8px;border-radius:50%;background:#3b6dff}
+
+  .today{background:linear-gradient(135deg,#1d2342 0%,#1a1f35 100%);
+    border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;overflow:hidden}
+  .today.is-rest{background:var(--card)}
+  .today .tag{display:inline-block;font-size:12px;color:var(--muted);background:rgba(255,255,255,.06);
+    padding:3px 10px;border-radius:999px;margin-bottom:8px}
+  .today h2{margin:4px 0 2px;font-size:20px}
+  .today .meta{color:var(--muted);font-size:13px;margin-bottom:14px}
+  .rest-emoji{font-size:40px}
+  .course{border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .course .name{font-weight:600;font-size:15px;margin-bottom:4px}
+  .course .row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .dur{font-size:12px;color:var(--muted)}
+  .vlink{display:inline-flex;align-items:center;gap:6px;background:#fb7299;color:#fff;text-decoration:none;
+    padding:7px 12px;border-radius:9px;font-size:13px;font-weight:600}
+  .vlink:hover{filter:brightness(1.08)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .pill{font-size:12px;color:var(--muted)}
+
+  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+  .day{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 8px;min-height:112px;
+    display:flex;flex-direction:column;gap:5px;position:relative}
+  .day .dw{font-size:11px;color:var(--muted);text-align:center}
+  .day .dd{font-size:12px;text-align:center;color:var(--text);font-weight:600}
+  .day.is-today{border-color:#3b6dff;box-shadow:0 0 0 2px rgba(59,109,255,.35) inset}
+  .day.rest{opacity:.55}
+  .day .part{font-size:11px;text-align:center;color:#fff;padding:3px 4px;border-radius:7px;font-weight:600}
+  .day .mins{font-size:11px;text-align:center;color:var(--muted)}
+  .day .lk{font-size:11px;text-align:center;color:#7aa0ff;text-decoration:none;margin-top:auto}
+  .day .lk:hover{text-decoration:underline}
+  .day .done{position:absolute;top:6px;right:8px;color:var(--ok);font-size:13px}
+  .tagx{font-size:10px;color:var(--muted);text-align:center}
+
+  .wk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+  .wk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .wk-head h3{margin:0;font-size:14px;color:var(--muted);font-weight:600}
+  .wk-head .cur{font-size:11px;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:1px 8px}
+  .sess{display:flex;gap:12px;border-top:1px solid var(--line);padding:12px 0}
+  .sess:first-of-type{border-top:none}
+  .sess.done .dtitle{text-decoration:line-through;opacity:.6}
+  .sess .pd{width:58px;flex:none;text-align:center;padding-top:2px}
+  .sess .pd .d1{font-size:15px;font-weight:700}
+  .sess .pd .d2{font-size:11px;color:var(--muted)}
+  .sess .pd .tagd{font-size:10px;border-radius:6px;padding:1px 4px;margin-top:3px;display:inline-block;color:#fff}
+  .badge{font-size:12px;color:#fff;padding:3px 9px;border-radius:999px;font-weight:600;white-space:nowrap}
+  .sess .mid{flex:1;min-width:0}
+  .dtitle{font-size:13.5px;font-weight:600;margin-bottom:6px}
+  .crow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 8px;
+    background:var(--card2);border:1px solid var(--line);border-radius:9px;margin-bottom:5px}
+  .cname{flex:1;min-width:0;font-size:13px;color:var(--text);text-decoration:none;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cname:hover{color:#9db4ff}
+  .cname .arrow{color:#fb7299;margin-right:5px}
+  .cdur{font-size:11px;color:var(--muted);flex:none}
+  .sess .ctl{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex:none;justify-content:center}
+  .chk{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);cursor:pointer}
+  .mini{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:7px;
+    padding:4px 8px;font-size:12px;cursor:pointer}
+  .mini:hover{border-color:#46508a}
+  .sess input[type=date]{background:var(--card2);color:var(--text);border:1px solid var(--line);
+    border-radius:7px;padding:4px 6px;font-size:12px}
+  .loadmore{width:100%;padding:12px;font-size:14px}
+  .moved{font-size:11px;color:#ffb45e}
+
+  .note{font-size:12px;color:var(--muted);background:var(--card);border:1px dashed var(--line);
+    border-radius:12px;padding:12px 14px;line-height:1.8}
+  .note b{color:var(--text)}
+  @media (max-width:560px){
+    .week{grid-template-columns:repeat(7,minmax(46px,1fr));gap:5px}
+    .day{padding:8px 3px;min-height:104px}
+    h1{font-size:19px}
+    .sess{flex-wrap:wrap}
+    .sess .ctl{flex-direction:row;align-items:center;width:100%;justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>💪 我的训练计划</h1></div>
+    <div class="progress" id="progress">已完成 <b>0</b> / 0 天</div>
+  </header>
+  <div class="sub">每周 5 练：周一 / 周三 / 周五（工作日约 30 分钟）+ 周六 / 周日（休息日 1~2 小时）· 一天一个部位 · 课程自动轮换不重样</div>
+  <div class="bar"><i id="bar"></i></div>
+
+  <div class="settings">
+    <label>计划开始日（周一）</label>
+    <input type="date" id="startDate" />
+    <button class="btn" id="applyStart">应用</button>
+    <button class="btn" id="resetBtn">恢复默认</button>
+    <span class="pill" id="rangeTxt"></span>
+  </div>
+
+  <section>
+    <div class="sec-title"><span class="dot"></span>今天练什么</div>
+    <div id="todayBox"></div>
+  </section>
+
+  <section>
+    <div class="sec-title"><span class="dot" style="background:var(--p-posture)"></span>近一周安排</div>
+    <div class="week" id="weekBox"></div>
+  </section>
+
+  <section>
+    <div class="sec-title"><span class="dot" style="background:var(--ok)"></span>训练总览（点课程名直达 B 站）</div>
+    <div id="monthBox"></div>
+    <button class="btn loadmore" id="moreBtn">＋ 生成后续 4 周（课程继续轮换，不重样）</button>
+  </section>
+
+  <div class="note">
+    <b>使用说明：</b><br>
+    · <b>每节课都有独立链接</b>：「今天」卡片和下方总览里，点课程名或「去 B 站训练」直达对应视频，时长为视频实际时长。<br>
+    · <b>改期 / 延期</b>：临时有事时，用「今天」卡片的「⏭ 延期 1 天」，或在总览里点任意一天的「📅 改期」自选新日期——只动当天，其余照常。<br>
+    · <b>标记完成</b>：练完勾选 ✅，进度自动更新。<br>
+    · <b>持续使用</b>：计划由调度算法生成，同部位课程按「最久未用优先」轮换；点底部按钮可一直往后排，下个月打开页面照常用。<br>
+    · <b>整体平移</b>：修改「计划开始日」可把整个计划顺延 / 提前（会清除已完成与改期记录，慎点）。<br>
+    · 数据仅存当前浏览器；本页为单文件、无外部依赖，发给任何人或放到任意静态空间都能直接打开。
+  </div>
+</div>
+
+<script>
+/* ================= 视频库（时长为你提供的实际时长） ================= */
+const LIB = {
+  v1 :{t:'欧阳春晓 体态矫正训练 从下往上合集', raw:'02:04:00', min:124, part:'体态'},
+  v2 :{t:'8分钟瘦后腰和侧腰（韩小四April）', raw:'08:23', min:8, part:'腰腹'},
+  v3 :{t:'8分钟简单快速瘦胳膊 · 锁骨&直角肩（韩小四April）', raw:'18:14', min:18, part:'上肢'},
+  v4 :{t:'45min无跑跳瘦全身运动（韩小四）', raw:'26:29', min:26, part:'全身'},
+  v5 :{t:'帕梅拉15分钟站立腹肌 + 沙漏腰3.0 + 普拉提虐腹', raw:'01:02:56', min:63, part:'腰腹'},
+  v6 :{t:'Eleni Fit 30分钟站立腹部有氧', raw:'36:04', min:36, part:'腰腹'},
+  v7 :{t:'欧阳春晓芭杆 barre 3.23 下肢训练', raw:'57:23', min:57, part:'下肢'},
+  v8 :{t:'躺虐下腹300次挑战', raw:'14:23', min:14, part:'腰腹'},
+  v9 :{t:'20分钟普拉提虐腹瘦肚', raw:'19:34', min:19, part:'腰腹'},
+  v10:{t:'Eleni Fit 30分钟无跳跃有氧HIIT舞蹈', raw:'36:36', min:36, part:'全身'},
+  v11:{t:'Eleni Fit 45分钟全身有氧HIIT', raw:'46:34', min:46, part:'全身'},
+  v12:{t:'欧阳春晓沙漏腰 1.0-3.0 合集', raw:'01:12:45', min:73, part:'腰腹'},
+  v13:{t:'欧阳春晓芭杆上肢体态薄背｜臀腿紧致', raw:'01:07:49', min:68, part:'上肢'}
+};
+const U = {
+  v1:'https://www.bilibili.com/video/BV1jzPDzYEZW/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v2:'https://www.bilibili.com/video/BV1UV411R7H4/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v3:'https://www.bilibili.com/video/BV1W7411c7rH/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v4:'https://www.bilibili.com/video/BV1Ri4y197WU/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v5:'https://www.bilibili.com/video/BV1qiQ4BPEXv/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v6:'https://www.bilibili.com/video/BV1pP4y1v7EH?spm_id_from=333.788.player.switch&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v7:'https://www.bilibili.com/video/BV1pP4y1v7EH?spm_id_from=333.788.player.switch&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v8:'https://www.bilibili.com/video/BV1z4NheWEaN/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v9:'https://www.bilibili.com/video/BV1pQ4y1g7C3/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v10:'https://www.bilibili.com/video/BV1m2e3zJEQX/?spm_id_from=333.1387.favlist.content.click',
+  v11:'https://www.bilibili.com/video/BV1YzYDzeEZm/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v12:'https://www.bilibili.com/video/BV1VABhBKEz6/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3',
+  v13:'https://www.bilibili.com/video/BV1fYoUBVEJK/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3'
+};
+
+/* ============ 调度规则 ============
+   周一(工作日·腰腹)：4 种短组合按组合级 LRU 轮换（≤36分钟）
+   周三(工作日·上肢)：v3（库中唯一工作日上肢课）
+   周五(工作日·全身)：v4 / v10 轮换
+   周六(休息日·下肢)：v7 / v13 轮换
+   周日(休息日·长课)：v1体态 / v12腰腹 / v11全身 / v5腰腹 轮换
+   选课策略：最久未用优先（LRU），保证尽量不重复                */
+const WAIST_COMBOS = [
+  {c:['v9','v2'], note:'普拉提虐腹 + 侧腰'},
+  {c:['v6'],      note:'站立腹部有氧'},
+  {c:['v8','v2'], note:'下腹挑战 + 侧腰'},
+  {c:['v8','v9'], note:'下腹挑战 + 普拉提虐腹'}
+];
+const FULL_POOL = ['v4','v10'];
+const LEG_POOL  = ['v7','v13'];
+const SUN_POOL  = ['v1','v12','v11','v5'];
+const SUN_PART  = {v1:'体态', v12:'腰腹', v11:'全身', v5:'腰腹'};
+const SUN_NOTE  = {v1:'体态矫正长课', v12:'沙漏腰合集', v11:'全身有氧 HIIT', v5:'腹肌+沙漏腰+普拉提'};
+
+const OFFSETS = [0,2,4,5,6]; // 周一、周三、周五、周六、周日
+const SLOT_NAME = ['周一','周三','周五','周六','周日'];
+const SLOT_KIND = ['工作日','工作日','工作日','休息日','休息日'];
+
+function genSessions(weekCount){
+  const usage = {}; // key -> {n:使用次数, w:上次使用周}
+  const cnt = k => usage[k] ? usage[k].n : 0;
+  const lastW = k => usage[k] ? usage[k].w : -1;
+  const bump = (k,w) => { const u = usage[k] || (usage[k]={n:0,w:-1}); u.n++; u.w=w; };
+  const pickLRU = (pool, exclude) => {
+    const cand = pool.filter(k => !exclude.includes(k));
+    cand.sort((a,b)=> (cnt(a)-cnt(b)) || (lastW(a)-lastW(b)) );
+    return cand[0];
+  };
+  // 腰腹组合：组合级 LRU（使用次数最少、最久未用的组合优先）
+  const combUse = WAIST_COMBOS.map(()=>({n:0,w:-1}));
+  const out = [];
+  for(let w=0; w<weekCount; w++){
+    let bi = 0;
+    for(let i=1;i<WAIST_COMBOS.length;i++){
+      const a=combUse[i], b=combUse[bi];
+      if(a.n<b.n || (a.n===b.n && a.w<b.w)) bi=i;
+    }
+    const monCombo = WAIST_COMBOS[bi];
+    combUse[bi] = {n:combUse[bi].n+1, w:w};
+    // 周三 / 周五
+    const friKey = pickLRU(FULL_POOL, []);
+    // 周六 / 周日（周日避开与周六相同的视频）
+    const satKey = pickLRU(LEG_POOL, []);
+    const sunKey = pickLRU(SUN_POOL, [satKey]);
+    const week = [
+      {slot:0, part:'腰腹', courses:monCombo.c, note:monCombo.note},
+      {slot:1, part:'上肢', courses:['v3'],     note:'瘦手臂·直角肩，时间充裕可加练1遍'},
+      {slot:2, part:'全身', courses:[friKey],   note:'全身燃脂'},
+      {slot:3, part:'下肢', courses:[satKey],   note:satKey==='v13' ? '臀腿紧致（芭杆）' : '热身+下肢训练+拉伸'},
+      {slot:4, part:SUN_PART[sunKey], courses:[sunKey], note:SUN_NOTE[sunKey]}
+    ];
+    week.forEach(s=>{
+      s.id = 'w'+w+'s'+s.slot; s.w = w;
+      s.courses.forEach(k=>bump(k,w));
+      out.push(s);
+    });
+  }
+  return out;
+}
+
+/* ================= 日期工具 ================= */
+function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`;}
+function parseISO(s){const a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2]);}
+function mondayOf(d){const x=new Date(d);const day=(x.getDay()+6)%7;x.setDate(x.getDate()-day);x.setHours(0,0,0,0);return x;}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function wdName(d){return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];}
+function fmtMin(n){return n>=60 ? Math.floor(n/60)+'小时'+String(n%60).padStart(2,'0')+'分' : n+'分钟';}
+
+/* ================= 状态 ================= */
+const KEY='tp_state_v2';
+let STATE;
+function load(){
+  try{STATE=JSON.parse(localStorage.getItem(KEY));}catch(e){STATE=null;}
+  if(!STATE||!STATE.start)STATE={start:iso(mondayOf(new Date())),weeks:8,adj:{},done:{}};
+  if(!STATE.weeks)STATE.weeks=8;
+  if(!STATE.adj)STATE.adj={};
+  if(!STATE.done)STATE.done={};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(STATE));}
+
+let SESSIONS=[];
+function baseDate(s){const d=parseISO(STATE.start);d.setDate(d.getDate()+s.w*7+OFFSETS[s.slot]);return d;}
+function effDate(s){return STATE.adj[s.id] ? parseISO(STATE.adj[s.id]) : baseDate(s);}
+function totalMin(s){return s.courses.reduce((a,k)=>a+LIB[k].min,0);}
+
+/* ================= 渲染 ================= */
+const PART_COLOR={腰腹:'var(--p-waist)',上肢:'var(--p-upper)',下肢:'var(--p-lower)',全身:'var(--p-full)',体态:'var(--p-posture)'};
+function el(tag,attrs,...kids){
+  const e=document.createElement(tag);
+  for(const k in (attrs||{})){
+    const v=attrs[k];
+    if(k==='class')e.className=v;
+    else if(k==='html')e.innerHTML=v;
+    else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);
+    else if(v!=null)e.setAttribute(k,v);
+  }
+  kids.flat().forEach(c=>{if(c==null||c===false)return;e.appendChild(typeof c==='string'?document.createTextNode(c):c);});
+  return e;
+}
+function vlink(url){return el('a',{href:url,target:'_blank',rel:'noopener',class:'vlink'},'▶ 去 B 站训练');}
+
+function byDateMap(){
+  const m={};
+  SESSIONS.forEach(s=>{const k=iso(effDate(s));(m[k]=m[k]||[]).push(s);});
+  return m;
+}
+
+function renderToday(){
+  const box=document.getElementById('todayBox');box.innerHTML='';
+  const TODAY=mondayOf(new Date());TODAY.setHours(0,0,0,0);
+  const todayStr=iso(TODAY);
+  const list=(byDateMap()[todayStr]||[]);
+  if(!list.length){
+    const beforeStart = TODAY < parseISO(STATE.start);
+    const afterEnd = !beforeStart && (TODAY > addDays(parseISO(STATE.start), STATE.weeks*7-1));
+    let msg=`${todayStr} · 本周训练日：周一 / 周三 / 周五 / 周六 / 周日`;
+    if(beforeStart) msg=`计划 ${STATE.start} 开始，先好好休整～`;
+    else if(afterEnd) msg='当前排期已到末尾，点下方「生成后续 4 周」继续训练';
+    box.appendChild(el('div',{class:'today is-rest'},
+      el('div',{class:'rest-emoji'},'💤'),
+      el('h2',null,'今天休息日'),
+      el('div',{class:'meta'},msg)
+    ));
+    return;
+  }
+  const s=list[0];const done=!!STATE.done[s.id];
+  const total=list.reduce((a,x)=>a+totalMin(x),0);
+  const nCourses=list.reduce((a,x)=>a+x.courses.length,0);
+  const card=el('div',{class:'today'+(done?' is-rest':'')});
+  card.appendChild(el('span',{class:'tag'},`${todayStr} · ${wdName(TODAY)} · ${done?'已完成 ✅':'待训练'}`));
+  card.appendChild(el('h2',null,`今天练 ${list.map(x=>x.part).join(' + ')} · 共 ${nCourses} 节课`));
+  card.appendChild(el('div',{class:'meta'},`总时长约 ${fmtMin(total)}${SLOT_KIND[s.slot]==='工作日'?'（工作日 · 约30分钟档）':'（休息日 · 1~2小时档）'}`));
+  list.forEach(x=>x.courses.forEach(k=>{
+    card.appendChild(el('div',{class:'course'},
+      el('div',{class:'name'},LIB[k].t),
+      el('div',{class:'row'},
+        el('span',{class:'dur'},`⏱ ${LIB[k].raw} · ${LIB[k].part}`),
+        vlink(U[k])
+      )
+    ));
+  }));
+  const acts=el('div',{class:'actions'});
+  if(!done){
+    acts.appendChild(el('button',{class:'btn primary',onclick:()=>{STATE.done[s.id]=true;save();render();}},'✅ 标记完成'));
+    acts.appendChild(el('button',{class:'btn',onclick:()=>{
+      STATE.adj[s.id]=iso(addDays(effDate(s),1));save();render();
+    }},'⏭ 延期 1 天'));
+  }else{
+    acts.appendChild(el('button',{class:'btn',onclick:()=>{delete STATE.done[s.id];save();render();}},'↩ 取消完成'));
+  }
+  card.appendChild(acts);
+  box.appendChild(card);
+}
+
+function renderWeek(){
+  const box=document.getElementById('weekBox');box.innerHTML='';
+  const TODAY=mondayOf(new Date());TODAY.setHours(0,0,0,0);
+  const todayStr=iso(TODAY);
+  const m=byDateMap();
+  for(let n=0;n<7;n++){
+    const d=addDays(TODAY,n);const k=iso(d);const list=m[k]||[];
+    const isToday=(k===todayStr);
+    const day=el('div',{class:'day'+(list.length?'':' rest')+(isToday?' is-today':'')});
+    day.appendChild(el('div',{class:'dw'},wdName(d)));
+    day.appendChild(el('div',{class:'dd'},`${d.getMonth()+1}/${d.getDate()}`));
+    if(list.length){
+      if(STATE.done[list[0].id])day.appendChild(el('div',{class:'done'},'✅'));
+      list.forEach(x=>{
+        day.appendChild(el('div',{class:'part',style:`background:${PART_COLOR[x.part]}`},x.part));
+      });
+      const mins=list.reduce((a,y)=>a+totalMin(y),0);
+      const nc=list.reduce((a,y)=>a+y.courses.length,0);
+      day.appendChild(el('div',{class:'mins'},`${fmtMin(mins)}${nc>1?' · '+nc+'课':''}`));
+      day.appendChild(el('a',{class:'lk',href:U[list[0].courses[0]],target:'_blank',rel:'noopener'},'▶ 去训练'));
+    }else{
+      day.appendChild(el('div',{class:'lk'},'休息'));
+    }
+    box.appendChild(day);
+  }
+}
+function nCoursesOf(list){return list.reduce((a,x)=>a+x.courses.length,0);}
+
+function renderMonth(){
+  const box=document.getElementById('monthBox');box.innerHTML='';
+  const TODAY=mondayOf(new Date());TODAY.setHours(0,0,0,0);
+  const curWeek=Math.floor((TODAY-parseISO(STATE.start))/(7*86400000));
+  let doneCount=0;
+  const byWeek={};
+  SESSIONS.forEach(s=>{(byWeek[s.w]=byWeek[s.w]||[]).push(s);});
+  Object.keys(byWeek).map(Number).sort((a,b)=>a-b).forEach(w=>{
+    const wk=el('div',{class:'wk'});
+    const d0=addDays(parseISO(STATE.start),w*7), d6=addDays(d0,6);
+    const head=el('div',{class:'wk-head'},
+      el('h3',null,`第 ${w+1} 周 · ${iso(d0)} ~ ${iso(d6)}`));
+    if(w===curWeek)head.appendChild(el('span',{class:'cur'},'本周'));
+    wk.appendChild(head);
+    byWeek[w].forEach(s=>{
+      const d=effDate(s);const done=!!STATE.done[s.id];
+      if(done)doneCount++;
+      const row=el('div',{class:'sess'+(done?' done':'')});
+      row.appendChild(el('div',{class:'pd'},
+        el('div',{class:'d1'},`${d.getMonth()+1}/${d.getDate()}`),
+        el('div',{class:'d2'},SLOT_NAME[s.slot]),
+        el('span',{class:'tagd',style:`background:${PART_COLOR[s.part]}`},SLOT_KIND[s.slot])
+      ));
+      row.appendChild(el('span',{class:'badge',style:`background:${PART_COLOR[s.part]}`},s.part));
+      const mid=el('div',{class:'mid'});
+      mid.appendChild(el('div',{class:'dtitle'},`${s.courses.length} 节课 · 约 ${fmtMin(totalMin(s))}${s.note?' · '+s.note:''}`));
+      s.courses.forEach(k=>{
+        mid.appendChild(el('div',{class:'crow'},
+          el('a',{class:'cname',href:U[k],target:'_blank',rel:'noopener',title:LIB[k].t},
+            el('span',{class:'arrow'},'▶'),LIB[k].t),
+          el('span',{class:'cdur'},LIB[k].raw)
+        ));
+      });
+      if(STATE.adj[s.id])mid.appendChild(el('div',{class:'moved'},'已改期（原 '+iso(baseDate(s))+'）'));
+      row.appendChild(mid);
+      const ctl=el('div',{class:'ctl'});
+      ctl.appendChild(el('label',{class:'chk'},
+        el('input',{type:'checkbox',checked:done?'checked':null,onchange:(e)=>{if(e.target.checked)STATE.done[s.id]=true;else delete STATE.done[s.id];save();render();}}),
+        '完成'));
+      ctl.appendChild(el('button',{class:'mini',onclick:(e)=>{const inp=e.target.parentElement.querySelector('input[type=date]');if(inp&&inp.showPicker)inp.showPicker();}},'📅 改期'));
+      ctl.appendChild(el('input',{type:'date',value:iso(d),onchange:(e)=>{STATE.adj[s.id]=e.target.value;save();render();}}));
+      row.appendChild(ctl);
+      wk.appendChild(row);
+    });
+    box.appendChild(wk);
+  });
+  const total=SESSIONS.length;
+  document.getElementById('progress').innerHTML=`已完成 <b>${doneCount}</b> / ${total} 天`;
+  document.getElementById('bar').style.width=(total?doneCount/total*100:0)+'%';
+  const first=effDate(SESSIONS[0]),last=effDate(SESSIONS[SESSIONS.length-1]);
+  document.getElementById('rangeTxt').textContent=`排期：${iso(first)} ～ ${iso(last)}（${STATE.weeks} 周）`;
+}
+
+function render(){
+  SESSIONS=genSessions(STATE.weeks);
+  document.getElementById('startDate').value=STATE.start;
+  document.getElementById('moreBtn').textContent=`＋ 生成后续 4 周（当前已排 ${STATE.weeks} 周）`;
+  renderToday();renderWeek();renderMonth();
+}
+
+/* ================= 事件 ================= */
+document.getElementById('applyStart').addEventListener('click',()=>{
+  const v=document.getElementById('startDate').value;
+  if(v && confirm('修改开始日将重排全部日期，并清除已完成 / 改期记录，确定？')){
+    STATE.start=v;STATE.adj={};STATE.done={};save();render();
+  }
+});
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(confirm('恢复默认排期？已完成与改期记录将被清除。')){
+    STATE={start:iso(mondayOf(new Date())),weeks:8,adj:{},done:{}};save();render();
+  }
+});
+document.getElementById('moreBtn').addEventListener('click',()=>{
+  STATE.weeks+=4;save();render();
+  document.getElementById('monthBox').lastElementChild.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+load();render();
+</script>
+</body>
+</html>
