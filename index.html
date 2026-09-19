@@ -308,7 +308,7 @@ function byDateMap(){
 
 function renderToday(){
   const box=document.getElementById('todayBox');box.innerHTML='';
-  const TODAY=mondayOf(new Date());TODAY.setHours(0,0,0,0);
+  const TODAY=new Date();TODAY.setHours(0,0,0,0);
   const todayStr=iso(TODAY);
   const list=(byDateMap()[todayStr]||[]);
   if(!list.length){
@@ -355,7 +355,7 @@ function renderToday(){
 
 function renderWeek(){
   const box=document.getElementById('weekBox');box.innerHTML='';
-  const TODAY=mondayOf(new Date());TODAY.setHours(0,0,0,0);
+  const TODAY=new Date();TODAY.setHours(0,0,0,0);
   const todayStr=iso(TODAY);
   const m=byDateMap();
   for(let n=0;n<7;n++){
