@@ -194,24 +194,24 @@ const U = {
   v13:'https://www.bilibili.com/video/BV1fYoUBVEJK/?spm_id_from=333.1387.favlist.content.click&vd_source=506b010946bf401262d1b7ebcc1896b3'
 };
 
-/* ============ 调度规则 ============
-   周一(工作日·腰腹)：4 种短组合按组合级 LRU 轮换（≤36分钟）
-   周三(工作日·上肢)：v3（库中唯一工作日上肢课）
-   周五(工作日·全身)：v4 / v10 轮换
-   周六(休息日·下肢)：v7 / v13 轮换
-   周日(休息日·长课)：v1体态 / v12腰腹 / v11全身 / v5腰腹 轮换
-   选课策略：最久未用优先（LRU），保证尽量不重复                */
+/* ============ 调度规则（基于 2026-09-25 修正后的真实时长） ============
+   周一(工作日·腰腹)：4 种短组合按组合级 LRU 轮换（22~36分钟）
+   周三(工作日·上肢)：v3 ×2 遍（8分钟课练两遍=16分钟；库中唯一工作日上肢课）
+   周五(工作日·全身)：v10 固定（36分钟；库中唯一 ≤36 分钟的全身课，v4 已超档）
+   周六(休息日·下肢)：v7 / v13 轮换（57~68分钟）
+   周日(休息日·长课)：v1体态 / v12腰腹 / v11全身 / v5腰腹 / v4全身 五门 LRU 轮换
+   选课策略：最久未用优先（LRU），保证尽量不重复                    */
 const WAIST_COMBOS = [
   {c:['v9','v2'], note:'普拉提虐腹 + 侧腰'},
   {c:['v6'],      note:'站立腹部有氧'},
   {c:['v8','v2'], note:'下腹挑战 + 侧腰'},
   {c:['v8','v9'], note:'下腹挑战 + 普拉提虐腹'}
 ];
-const FULL_POOL = ['v4','v10'];
+const FULL_POOL = ['v10'];
 const LEG_POOL  = ['v7','v13'];
-const SUN_POOL  = ['v1','v12','v11','v5'];
-const SUN_PART  = {v1:'体态', v12:'腰腹', v11:'全身', v5:'腰腹'};
-const SUN_NOTE  = {v1:'体态矫正长课', v12:'沙漏腰合集', v11:'全身有氧 HIIT', v5:'腹肌+沙漏腰+普拉提'};
+const SUN_POOL  = ['v1','v12','v11','v5','v4'];
+const SUN_PART  = {v1:'体态', v12:'腰腹', v11:'全身', v5:'腰腹', v4:'全身'};
+const SUN_NOTE  = {v1:'体态矫正长课', v12:'沙漏腰合集', v11:'全身有氧 HIIT', v5:'腹肌+沙漏腰+普拉提', v4:'无跑跳瘦全身'};
 
 const OFFSETS = [0,2,4,5,6]; // 周一、周三、周五、周六、周日
 const SLOT_NAME = ['周一','周三','周五','周六','周日'];
@@ -245,8 +245,8 @@ function genSessions(weekCount){
     const sunKey = pickLRU(SUN_POOL, [satKey]);
     const week = [
       {slot:0, part:'腰腹', courses:monCombo.c, note:monCombo.note},
-      {slot:1, part:'上肢', courses:['v3'],     note:'瘦手臂·直角肩，时间充裕可加练1遍'},
-      {slot:2, part:'全身', courses:[friKey],   note:'全身燃脂'},
+      {slot:1, part:'上肢', courses:['v3','v3'], note:'瘦手臂 ×2 遍 · 状态好可加练第 3 遍'},
+      {slot:2, part:'全身', courses:[friKey],   note:'全身燃脂（库中唯一 ≤36 分钟全身课）'},
       {slot:3, part:'下肢', courses:[satKey],   note:satKey==='v13' ? '臀腿紧致（芭杆）' : '热身+下肢训练+拉伸'},
       {slot:4, part:SUN_PART[sunKey], courses:[sunKey], note:SUN_NOTE[sunKey]}
     ];
@@ -357,9 +357,10 @@ function renderWeek(){
   const box=document.getElementById('weekBox');box.innerHTML='';
   const TODAY=new Date();TODAY.setHours(0,0,0,0);
   const todayStr=iso(TODAY);
+  const MONDAY=mondayOf(TODAY);
   const m=byDateMap();
   for(let n=0;n<7;n++){
-    const d=addDays(TODAY,n);const k=iso(d);const list=m[k]||[];
+    const d=addDays(MONDAY,n);const k=iso(d);const list=m[k]||[];
     const isToday=(k===todayStr);
     const day=el('div',{class:'day'+(list.length?'':' rest')+(isToday?' is-today':'')});
     day.appendChild(el('div',{class:'dw'},wdName(d)));
